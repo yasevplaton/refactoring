@@ -8,10 +8,6 @@ export interface IPlay {
   type: EPlayTypes;
 }
 
-export type TPlayCalculation = {
-  [type in EPlayTypes]: (audience: number) => number;
-};
-
 export interface IPlaysCollection {
   [playId: string]: IPlay;
 }
@@ -40,7 +36,3 @@ export interface IInvoiceStatement {
 }
 
 export type TStatementResultFormat = "text" | "html";
-
-export type IRenderFunctions = {
-  [format in TStatementResultFormat]: (data: IInvoiceStatement) => string;
-};

@@ -20,13 +20,6 @@ abstract class PerformanceCalculator implements IPerformanceCalculator {
 }
 
 class ComedyCalculator extends PerformanceCalculator {
-  performance: IPerformance;
-
-  constructor(performance: IPerformance) {
-    super(performance);
-    this.performance = performance;
-  }
-
   getAmount() {
     const { audience } = this.performance;
     let amount = 30000;
@@ -43,13 +36,6 @@ class ComedyCalculator extends PerformanceCalculator {
 }
 
 class TragedyCalculator extends PerformanceCalculator {
-  performance: IPerformance;
-
-  constructor(performance: IPerformance) {
-    super(performance);
-    this.performance = performance;
-  }
-
   getAmount() {
     const { audience } = this.performance;
     let amount = 40000;

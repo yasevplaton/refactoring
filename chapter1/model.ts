@@ -6,80 +6,56 @@ import {
   IPlay,
   TStatementResultFormat,
 } from "./types";
-import {
-  PLAY_AMOUNT_CALCULATION_FUNCTIONS,
-  PLAY_CREDITS_CALCULATION_FUNCTIONS,
-} from "./helpers";
 import { playsData } from "./mock";
 import { render } from "./view";
+import { createPerformanceCalculator } from "./performance-calculator";
 
-function getTotalCreditsVolume(performances: IPerformance[]): number {
+function getTotalCreditsVolume(performances: IEnrichedPerformance[]): number {
   return performances.reduce(
-    (result: number, perf: IPerformance) => result + calcVolumeCredits(perf),
+    (result: number, perf: IEnrichedPerformance) => result + perf.creditsVolume,
     0
   );
 }
 
-function getTotalAmount(performances: IPerformance[]): number {
+function getTotalAmount(performances: IEnrichedPerformance[]): number {
   return performances.reduce(
-    (result: number, perf: IPerformance) =>
-      result + calcPerformanceAmount(perf),
+    (result: number, perf: IEnrichedPerformance) => result + perf.amount,
     0
   );
 }
 
-function getEnrichedPerformances(
-  performances: IPerformance[]
-): IEnrichedPerformance[] {
-  return performances.map((perf: IPerformance) => {
+function enrichPerformance(perf: IPerformance): IEnrichedPerformance {
+  const play = getPlay(perf.playID);
+  const calculator = createPerformanceCalculator(perf, play.type);
+
+  if (!calculator) {
+    console.error(`Cannot work with play ${play.toString()}`);
     return {
       ...perf,
-      amount: calcPerformanceAmount(perf),
-      playData: getPlay(perf.playID),
+      amount: 0,
+      creditsVolume: 0,
+      playData: play,
     };
-  });
-}
-
-function calcPerformanceAmount(performance: IPerformance): number {
-  const play = getPlay(performance.playID);
-  if (!play) {
-    console.error(`Cannot find play with id ${performance.playID}`);
-    return 0;
   }
 
-  const calcAmountFunc = PLAY_AMOUNT_CALCULATION_FUNCTIONS[play.type];
-  return calcAmountFunc ? calcAmountFunc(performance.audience) : 0;
-}
-
-function calcVolumeCredits(performance: IPerformance): number {
-  const play = getPlay(performance.playID);
-
-  if (!play) {
-    console.error(`Cannot find play with id ${performance.playID}`);
-    return 0;
-  }
-
-  let res = 0;
-  res += Math.max(performance.audience - 30, 0);
-
-  const calcAdditionalCredits = PLAY_CREDITS_CALCULATION_FUNCTIONS[play.type];
-
-  if (calcAdditionalCredits) {
-    res += calcAdditionalCredits(performance.audience);
-  }
-
-  return res;
+  return {
+    ...perf,
+    amount: calculator.getAmount(),
+    creditsVolume: calculator.getCreditsVolume(),
+    playData: play,
+  };
 }
 
 export const getPlay = (playId: string): IPlay => playsData[playId];
 
 export function getStatement(invoice: IInvoice): IInvoiceStatement {
   const { customer, performances } = invoice;
+  const enrichedPerformances = performances.map(enrichPerformance);
   return {
     customer: customer,
-    performances: getEnrichedPerformances(performances),
-    totalAmount: getTotalAmount(performances),
-    creditsVolume: getTotalCreditsVolume(performances),
+    performances: enrichedPerformances,
+    totalAmount: getTotalAmount(enrichedPerformances),
+    creditsVolume: getTotalCreditsVolume(enrichedPerformances),
   };
 }
 

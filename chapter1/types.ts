@@ -23,6 +23,7 @@ export interface IPerformance {
 
 export interface IEnrichedPerformance extends IPerformance {
   amount: number;
+  creditsVolume: number;
   playData: IPlay;
 }
 

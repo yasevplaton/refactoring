@@ -4,10 +4,8 @@ import {
   IPerformance,
   IEnrichedPerformance,
   IPlay,
-  TStatementResultFormat,
 } from "./types";
 import { playsData } from "./mock";
-import { render } from "./view";
 import { createPerformanceCalculator } from "./performance-calculator";
 
 function getTotalCreditsVolume(performances: IEnrichedPerformance[]): number {
@@ -46,7 +44,9 @@ function enrichPerformance(perf: IPerformance): IEnrichedPerformance {
   };
 }
 
-export const getPlay = (playId: string): IPlay => playsData[playId];
+export function getPlay(playId: string): IPlay {
+  return playsData[playId];
+}
 
 export function getStatement(invoice: IInvoice): IInvoiceStatement {
   const { customer, performances } = invoice;
@@ -57,11 +57,4 @@ export function getStatement(invoice: IInvoice): IInvoiceStatement {
     totalAmount: getTotalAmount(enrichedPerformances),
     creditsVolume: getTotalCreditsVolume(enrichedPerformances),
   };
-}
-
-export function statement(
-  invoice: IInvoice,
-  format?: TStatementResultFormat
-): string {
-  return render(getStatement(invoice), format);
 }

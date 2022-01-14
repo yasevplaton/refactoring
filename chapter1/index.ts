@@ -1,4 +1,5 @@
 import { invoiceData } from "./mock";
-import { statement } from "./model";
+import { statement } from "./controller";
 
-console.log(statement(invoiceData));
+const result = statement(invoiceData, "html");
+console.log(result);

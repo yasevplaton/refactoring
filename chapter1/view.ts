@@ -6,22 +6,16 @@ import {
 import { usdFormat } from "./helpers";
 
 interface IRenderer {
-  render(): string;
+  render(data: IInvoiceStatement): string;
 }
 
 abstract class Renderer implements IRenderer {
-  data: IInvoiceStatement;
-
-  constructor(data: IInvoiceStatement) {
-    this.data = data;
-  }
-
-  abstract render(): string;
+  abstract render(data: IInvoiceStatement): string;
 }
 
 class TextRenderer extends Renderer {
-  render() {
-    const { customer, performances, totalAmount, creditsVolume } = this.data;
+  render(data: IInvoiceStatement) {
+    const { customer, performances, totalAmount, creditsVolume } = data;
     return `
     Statement for ${customer}
         ${performances
@@ -38,8 +32,8 @@ class TextRenderer extends Renderer {
 }
 
 class HtmlRenderer extends Renderer {
-  render() {
-    const { customer, performances, totalAmount, creditsVolume } = this.data;
+  render(data: IInvoiceStatement) {
+    const { customer, performances, totalAmount, creditsVolume } = data;
     return `
     <html>
     Statement for ${customer}
@@ -57,16 +51,13 @@ class HtmlRenderer extends Renderer {
   }
 }
 
-function createRenderer(
-  data: IInvoiceStatement,
-  format?: TStatementResultFormat
-): IRenderer {
+function createRenderer(format?: TStatementResultFormat): IRenderer {
   switch (format) {
     case "html":
-      return new HtmlRenderer(data);
+      return new HtmlRenderer();
     case "text":
     default:
-      return new TextRenderer(data);
+      return new TextRenderer();
   }
 }
 
@@ -74,6 +65,6 @@ export function render(
   statementData: IInvoiceStatement,
   format?: TStatementResultFormat
 ): string {
-  const renderer = createRenderer(statementData, format);
-  return renderer.render();
+  const renderer = createRenderer(format);
+  return renderer.render(statementData);
 }
